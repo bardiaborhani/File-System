@@ -2,7 +2,7 @@ public class FileSystem {
 
   private SuperBlock superblock;
   private Directory directory;
-  pricate FileTable filetable;
+  private FileTable filetable;
   
   public FileSytem( int diskBlocks ) { 
   
