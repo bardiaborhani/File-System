@@ -10,11 +10,22 @@ public class FileTable {
 
    // major public methods
    public synchronized FileTableEntry falloc( String filename, String mode ) {
+      
       // allocate a new file (structure) table entry for this file name
+      //fte = new FileTableEntry();
+      
       // allocate/retrieve and register the corresponding inode using dir
+      iNode = dir.namei( filename );
+      
       // increment this inode's count
+      
+      
       // immediately write back this inode to the disk
+      
+      
       // return a reference to this file (structure) table entry
+      
+      
    }
 
    public synchronized boolean ffree( FileTableEntry e ) {
