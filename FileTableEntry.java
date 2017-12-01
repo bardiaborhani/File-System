@@ -12,5 +12,9 @@ public class FileTableEntry {          // Each table entry should have
       mode = m;                // once access mode is set, it never changes
       if ( mode.compareTo( "a" ) == 0 ) // if mode is append,
          seekPtr = inode.length;        // seekPtr points to the end of file
+      
+      // ADDED
+      i.addCount();
+      
    }
 }
