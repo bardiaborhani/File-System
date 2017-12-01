@@ -1,4 +1,5 @@
 public class Directory {
+   
    private static int maxChars = 30; // max characters of each file name
 
    // Directory entries
@@ -15,9 +16,24 @@ public class Directory {
       root.getChars( 0, fsizes[0], fnames[0], 0 ); // fnames[0] includes "/"
    }
 
+   // assumes data[] received directory information from disk
+   // data[] is the directory file in bytes
+   // initializes the Directory instance with this data[]
    public void bytes2directory( byte data[] ) {
-      // assumes data[] received directory information from disk
-      // initializes the Directory instance with this data[]
+      
+      int offset = 0;
+      
+      for ( int i = 0; i < fsizes.length; i++, offset += 4 ) {
+         fsizes[i] = SysLib.bytes2int( data , offset );
+      }
+      
+      for ( int i = 0; i < fnames.length; i++, offset += maxChars * 2 ) { 
+       
+         String fname = new String( data, offset, maxChars * 2 );
+         fname.getChars( 0 , fsizes[i] , fnames[i] , 0 );
+         
+      }
+      
    }
 
    public byte[] directory2bytes( ) {
