@@ -36,5 +36,35 @@ Public class Superblock {
     
 
   }
+  
+  
+  
+  public void format( int totalInodeBlocks ) {
+    
+    
+  }
+  
+  
+  // Write back totalBlocks, inodeBlocks, and freeList to disk
+  public sync( ) {
+    
+    
+  }
+  
+  
+  // Deque the top block from the free list
+  public int getFreeBlock( ) {
+    
+    
+  }
+  
+  
+  // Enqueue a given block to the end of the free list
+  public boolean returnBlock( int blockNumber ){
+    
+    
+  }
+  
+  
    
 }
