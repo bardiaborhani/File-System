@@ -39,11 +39,16 @@ public class Inode {
       // design it by yourself.
    }
    
-   
-   // ADDED
-   void addCount(){
-         count++;
+   short getIndexBlockNumber() {
+      
    }
    
+   boolean setIndexBlock( short indexBlockNumber ) {
+      
+   }
+  
+   short findTargetBlock( ) {
+      
+   }
    
 }
