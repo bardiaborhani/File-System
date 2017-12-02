@@ -47,13 +47,22 @@ public class Directory {
    // allocates a new inode number for this filename
    public short ialloc( String filename ) {
       
-      for ( int i = 0; i < fsize.length; i++ ) {
+      
+      for ( short i = 0; i < fsize.length; i++ ) {
          
+         // allocate
          if( fsize[i] == 0 ){
-            // allocate
+            
+            fsize[i] = filename.length();
+            filename.getChars( 0, fsize[i], fnames[i], 0 );
+            return i;
+            
          }
          
       }
+      
+      // indicate that no space to allocate new inode number
+      return -1;
       
    }
 
