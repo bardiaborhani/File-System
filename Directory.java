@@ -7,13 +7,13 @@ public class Directory {
    private char fnames[][];    // each element stores a different file name.
 
    public Directory( int maxInumber ) { // directory constructor
-      fsizes = new int[maxInumber];     // maxInumber = max files
+      fsize = new int[maxInumber];     // maxInumber = max files
       for ( int i = 0; i < maxInumber; i++ ) 
          fsize[i] = 0;                 // all file size initialized to 0
       fnames = new char[maxInumber][maxChars];
       String root = "/";                // entry(inode) 0 is "/"
       fsize[0] = root.length( );        // fsize[0] is the size of "/".
-      root.getChars( 0, fsizes[0], fnames[0], 0 ); // fnames[0] includes "/"
+      root.getChars( 0, fsize[0], fnames[0], 0 ); // fnames[0] includes "/"
    }
 
    // assumes data[] received directory information from disk
@@ -23,14 +23,14 @@ public class Directory {
       
       int offset = 0;
       
-      for ( int i = 0; i < fsizes.length; i++, offset += 4 ) {
-         fsizes[i] = SysLib.bytes2int( data , offset );
+      for ( int i = 0; i < fsize.length; i++, offset += 4 ) {
+         fsize[i] = SysLib.bytes2int( data , offset );
       }
       
       for ( int i = 0; i < fnames.length; i++, offset += maxChars * 2 ) { 
        
          String fname = new String( data, offset, maxChars * 2 );
-         fname.getChars( 0 , fsizes[i] , fnames[i] , 0 );
+         fname.getChars( 0 , fsize[i] , fnames[i] , 0 );
          
       }
       
@@ -42,18 +42,53 @@ public class Directory {
       // note: only meaningfull directory information should be converted
       // into bytes.
    }
-
+   
+   // filename is the one of a file to be created.
+   // allocates a new inode number for this filename
    public short ialloc( String filename ) {
-      // filename is the one of a file to be created.
-      // allocates a new inode number for this filename
+      
+      for ( int i = 0; i < fsize.length; i++ ) {
+         
+         if( fsize[i] == 0 ){
+            // allocate
+         }
+         
+      }
+      
    }
 
+   // deallocates this inumber (inode number)
+   // the corresponding file will be deleted.
    public boolean ifree( short iNumber ) {
-      // deallocates this inumber (inode number)
-      // the corresponding file will be deleted.
+     
+      if ( iNumber <= 0 || iNumber > fsize.length ) {
+         
+         return false;
+         
+      } else {
+         // set file size to 0
+         fsize[iNumber] = 0;
+         return true;
+         
+      }
+      
    }
 
+   // returns the inumber corresponding to this filename
+   // ...CHECK...
    public short namei( String filename ) {
-      // returns the inumber corresponding to this filename
+      
+      // fsize.length == maxInumber
+      // loop through all inodes
+      for ( short i = 0; i < fsize.length; i++ ) {
+         char[] fnameString = fnames[i];
+         // converts the character array into a string
+         Arrays.toString(fnameString);
+         if( fnameString.equals(filename) ){
+            return i;   
+         }
+      }
+      
    }
+   
 }
