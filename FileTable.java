@@ -8,23 +8,56 @@ public class FileTable {
       dir = directory;           // receive a reference to the Director
    }                             // from the file system
 
-   // major public methods
+   // allocate a new file (structure) table entry for this file name
+   // allocate/retrieve and register the corresponding inode using dir
+   // increment this inode's count
+   // immediately write back this inode to the disk
+   // return a reference to this file (structure) table entry
    public synchronized FileTableEntry falloc( String filename, String mode ) {
       
-      // allocate a new file (structure) table entry for this file name
-      //fte = new FileTableEntry();
+      short iNumber = -1;
+      Inode inode = null;
       
-      // allocate/retrieve and register the corresponding inode using dir
-      iNode = dir.namei( filename );
+      while ( true ) {
+       
+         iNumber = fnames.equals( "/" ) ? : 0 dir.namei( fname );   
+         
+         if ( iNumber >= 0 ){
+          
+            inode = new Inode( iNumber );
+            
+            // was previously "mode.compareTo( "r" )"
+            if ( mode.equals( "r" ) ) {
+               
+              /* if ( inode.flag is "read" ){
+                  // no need to wait
+                  break;  
+               } else if ( inode.flag is "write" ) {
+                  try{
+                     wait();  
+                  } catch( InterruptedException e ) { }
+               } else if ( inode.flag is 'to be deleted' ) {
+                  iNumber = -1; // no more open
+                  return null;
+               }*/
+               
+            }
+            
+         }
+         
+      }
       
-      // increment this inode's count
+      inode.count++;
+      inode.toDisk( iNumber );
       
+      // create a table entry and register it
+      FileTableEntry e = new FileTableEntry( inode , iNumber , mode );
       
-      // immediately write back this inode to the disk
+      // add the table entry to the vector variable "table" that holds
+      // all table entries
+      table.addElement( e );  
       
-      
-      // return a reference to this file (structure) table entry
-      
+      return e;
       
    }
 
