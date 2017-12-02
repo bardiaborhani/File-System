@@ -29,17 +29,24 @@ public class FileTable {
             // was previously "mode.compareTo( "r" )"
             if ( mode.equals( "r" ) ) {
                
-              /* if ( inode.flag is "read" ){
+               // flag statuses unused (= 0), used(= 1), read(=2), write(=3), delete(=4)
+               
+               // inode.flag is "read"
+               if ( inode.flag == 2 ){
                   // no need to wait
                   break;  
-               } else if ( inode.flag is "write" ) {
+                  
+               // inode.flag is "write"  
+               } else if ( inode.flag == 3 ) {
                   try{
                      wait();  
                   } catch( InterruptedException e ) { }
-               } else if ( inode.flag is 'to be deleted' ) {
+               
+               // inode.flag is 'to be deleted'   
+               } else if ( inode.flag is == 4 ) {
                   iNumber = -1; // no more open
                   return null;
-               }*/
+               }
                
             }
             
