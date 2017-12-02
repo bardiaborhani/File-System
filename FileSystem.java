@@ -43,6 +43,9 @@ public class FileSystem {
   
   FileTabeEntry open( String filename , String mode ){
   
+    FileTableEntry fte = filetable.falloc( filename , mode );
+    return fte;
+    
   }
   
   boolean close( FileTableEntry ftEnt ){
@@ -67,6 +70,9 @@ public class FileSystem {
   
   boolean delete( String filename ){
   
+    short iNumber = dictionary.namei(filename);
+    return ifree( iNumber );
+    
   }
   
   private final int SEEK_SET = 0;
