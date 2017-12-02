@@ -36,11 +36,37 @@ public class Directory {
       
    }
 
+   // converts and return Directory information into a plain byte array
+   // this byte array will be written back to disk
+   // note: only meaningfull directory information should be converted
+   // into bytes.
    public byte[] directory2bytes( ) {
-      // converts and return Directory information into a plain byte array
-      // this byte array will be written back to disk
-      // note: only meaningfull directory information should be converted
-      // into bytes.
+      
+      int offset = 0;
+      
+      int storeFsize = 4 * fsize.length;
+      int storeFnames = ( maxChars * 2 ) * fnames.length;
+      byte[] dictionaryInBytes = new byte[ storeFsize + storeFnames ];
+
+      for ( int i = 0; i < fsize.length; i++, offset += 4 ) {
+         
+         SysLib.int2bytes( fsize[i] , dictionaryInBytes , offset );   
+         
+      }
+
+      // CHECK
+      for ( int i = 0; i < fnames.length; i++, offset += maxChars * 2 ) { 
+         
+         char[] tempName = fnames[i];
+         byte[] nameInBytes = new byte[tempName.length];
+         for ( int j = 0; j < tempName.length; j++ ) {
+            nameInBytes[j] = (byte) tempName[j];   
+         }
+         dictionaryInBytes[offset] = temp;      
+      }
+      
+      return dictionaryInBytes;
+      
    }
    
    // filename is the one of a file to be created.
