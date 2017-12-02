@@ -17,10 +17,24 @@ public class Inode {
       indirect = -1;
    }
 
+   
    Inode( short iNumber ) {                       // retrieving inode from disk
-      // design it by yourself.
+      
+      int blockNumber = 1 + iNumber / 16;
+      byte[] data = new byte[Disk.blockSize];
+      SysLib.rawread( blockNumber , data );
+      int offset = ( iNumber % 16 ) * 32;
+      
+      length = SysLib.bytes2int( data , offset );
+      offset += 4;
+      count = SysLib.bytes2short( data , offset );
+      offset += 2;
+      flag = SysLib.bytes2short( data , offset );
+      offset += 2;
+      
    }
 
+   
    int toDisk( short iNumber ) {                  // save to disk as the i-th inode
       // design it by yourself.
    }
