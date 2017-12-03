@@ -20,4 +20,50 @@ public class TCB {
          ftEnt[i] = null;         // all entries initialized to null
          // fd[0], fd[1], and fd[2] are kept null.
    }
+   
+   public Thread getThread() {
+      return thread;
+   }
+   
+   public void setTerminated( boolean status ) { 
+      terminate = status;
+   }
+   
+   public boolean getTerminated( ) { 
+      return terminate;
+   }
+   
+   public int getTid( ) {
+      return tid;
+   }
+   
+   public int getPid( ) {
+      return pid;
+   }
+   
+   public FileTableEntry getFtEnt( int fd ) {
+      if ( entry == null ) {
+	      return -1;
+      }
+      if ( fd >= 3 && fd < 32 ) {
+         return ftEnt[fd];
+      } else {
+         return null;
+      }
+      
+   }
+   
+   // CHECK - comapring FileTableEntries properly?
+   public int getFd( FileTableEntry e ) {
+      for ( int i = 3; i < 32; i++ ) {
+         if ( ftEnt[i].node == e.inode ) {
+            return i;   
+         }
+      }
+   }
+   
+   /*public returnFd( int fd ) {
+      return   
+   }*/
+   
 }
