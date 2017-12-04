@@ -88,20 +88,7 @@ public class Inode {
   
    short findTargetBlock( int offset ) {
       
-      target = offset / Disk.blockSize;
-      
-      if ( target < 11 ) {
-         return direct[target];
-      }
-      
-      if ( indirect < 0 ) {
-         return -1;
-      }
-   
-      byte[] data = new byte[Disk.blockSize];
-      SysLib.rawread( indirect , data );
-      
-      return SysLib.bytes2short( data , ( target - 11 ) * 2 );
+    
       
    }
    
