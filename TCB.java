@@ -1,69 +1,82 @@
 public class TCB {
-   private Thread thread = null;
-   private int tid = 0;
-   private int pid = 0;
-   private boolean terminate = false;
+    public static int MAX_ENTRY = 32;
+    public static int ERROR = -1;
+    private Thread thread = null;
+    private int tid = 0;
+    private int pid = 0;
+    private boolean terminate = false;
 
-   // User file descriptor table: 
-   // each entry pointing to a file (structure) table entry
-   public FileTableEntry[] ftEnt = null;
+    // User file descriptor table:
+    // each entry pointing to a file (structure) table entry
+    public FileTableEntry[] ftEnt = null;
 
-   public TCB( Thread newThread, int myTid, int parentTid ) {
-      thread = newThread;
-      tid = myTid;
-      pid = parentTid;
-      terminated = false;
+    public TCB( Thread newThread, int myTid, int parentTid ) {
+        thread = newThread;
+        tid = myTid;
+        pid = parentTid;
+        terminate = false;
 
-      // The following code is added for the file system
-      ftEnt = new FileTableEntry[32];
-      for ( int i = 0; i < 32; i++ )
-         ftEnt[i] = null;         // all entries initialized to null
-         // fd[0], fd[1], and fd[2] are kept null.
-   }
-   
-   public Thread getThread() {
-      return thread;
-   }
-   
-   public void setTerminated( boolean status ) { 
-      terminate = status;
-   }
-   
-   public boolean getTerminated( ) { 
-      return terminate;
-   }
-   
-   public int getTid( ) {
-      return tid;
-   }
-   
-   public int getPid( ) {
-      return pid;
-   }
-   
-   public FileTableEntry getFtEnt( int fd ) {
-      if ( entry == null ) {
-	      return -1;
-      }
-      if ( fd >= 3 && fd < 32 ) {
-         return ftEnt[fd];
-      } else {
-         return null;
-      }
-      
-   }
-   
-   // CHECK - comapring FileTableEntries properly?
-   public int getFd( FileTableEntry e ) {
-      for ( int i = 3; i < 32; i++ ) {
-         if ( ftEnt[i].node == e.inode ) {
-            return i;   
-         }
-      }
-   }
-   
-   /*public returnFd( int fd ) {
-      return   
-   }*/
-   
+        // The following code is added for the file system
+        ftEnt = new FileTableEntry[MAX_ENTRY];
+//        for ( int i = 0; i < MAX_ENTRY; i++ )
+//            ftEnt[i] = null;         // all entries initialized to null
+//        // fd[0], fd[1], and fd[2] are kept null.
+//    }
+    }
+
+    public synchronized Thread getThread(){
+        return thread;
+    }
+
+    public synchronized int getTid(){
+        return tid;
+    }
+
+    public synchronized int getPid(){
+        return pid;
+    }
+
+    public synchronized boolean setTerminated(){
+        terminate = true;
+        return terminate;
+    }
+
+    public synchronized boolean getTerminated(){
+        return terminate;
+    }
+
+    /**
+     *
+     * @param entry
+     * @return
+     */
+    public synchronized int getFd(FileTableEntry entry){
+        if (entry == null)
+            return ERROR;
+        for (int i = 3; i < MAX_ENTRY; i++){
+            if (ftEnt[i] == null){
+                ftEnt[i] = entry;
+                return i;
+            }
+        }
+        return ERROR;
+    }
+
+    public synchronized FileTableEntry returnFd(int fd){
+
+        if (fd >= 3 && fd < MAX_ENTRY){
+            FileTableEntry fte = ftEnt[fd];
+            ftEnt[fd] = null;
+            return fte;
+        }
+
+        return null;
+    }
+
+    public synchronized FileTableEntry getFtEnt(int fd){
+        if (fd >= 3 && fd < MAX_ENTRY){
+            return ftEnt[fd];
+        }
+        return null;
+    }
 }
