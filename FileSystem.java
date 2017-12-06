@@ -32,14 +32,30 @@ public class FileSystem {
   
   }
  
- 
+  // FINISH
   void sync() {
   
+    superblock.sync();
+    
+    //directory.directory2bytes();
+    
   }
   
+  // delete everything and reinstatiate 
   boolean format( int files ) {
   
+    superblock.format( files );
+    
+    directory = new Directory(superblock.inodeBlocks);
+
+    // put the directory in the FileTable
+    filetable = new FileTable(directory);
+    
+    return true;
+    
   }
+  
+  
   
   FileTabeEntry open( String filename , String mode ){
   
@@ -48,13 +64,27 @@ public class FileSystem {
     
   }
   
+  
+  
   boolean close( FileTableEntry ftEnt ){
   
+    ftEnt.count--;
+    
+    if ( ftEnt.count == 0 ) { 
+      
+      return filetable.ffree( ftEnt );
+      
+    }
+    
+    return true;
+    
   }
+  
   
   int fsize( FileTableEntry ftEnt ){
-  
+    return ftEnt.inode.length;
   }
+  
   
   int read( FileTableEntry ftEnt, byte[] buffer ){
   
