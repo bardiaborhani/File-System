@@ -124,6 +124,8 @@ public class Directory {
          }
       }
       
+      // indicates that the file was not found - it does not exist in the directory
+      return -1;
    }
    
 }
