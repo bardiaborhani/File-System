@@ -1,4 +1,5 @@
 public class Inode {
+   
    private final static int iNodeSize = 32;       // fix to 32 bytes
    private final static int directSize = 11;      // # direct pointers
 
@@ -43,7 +44,7 @@ public class Inode {
    }
 
    // put the contents of this Inode object (the field variable values) into disk
-   void toDisk( short iNumber ) {                  // save to disk as the i-th inode
+   public void toDisk( short iNumber ) {                  // save to disk as the i-th inode
            
       // This byte array will contain all the values of this object (the field variable values)
       // will be used later as a parameter in SysLib.rawwrite() to insert the data into disk
@@ -78,17 +79,59 @@ public class Inode {
       
    }
    
-   short getIndexBlockNumber() {
+   public short getIndexBlockNumber() {
       return indirect;
    }
    
-   boolean setIndexBlock( short indexBlockNumber ) {
+   public boolean setIndexBlock( short indexBlockNumber ) {
       
+      // no need to set indirect variable to a block if the 
+      // if the file isn't big enough to filled the direct blocks
+      for ( int i = 0; i < 11; i++ ) {
+         if ( direct == -1 ) {
+            return false;
+         }
+      }
+      
+      // if the index has already been set we cannot change its value
+      if ( indirect == -1 ) {
+         return false;  
+      }
+      
+      indirect = indexBlockNumber;
+      
+      byte[] data = new byte[Disk.blockSize];
+      
+      // fill the index block with block pointers
+      // each block pointer is 2 bytes big
+      // block size / block pointer size = # of block pointers 
+      for ( int i = 0; i < Disk.blockSize / 2; i++ ) { 
+         // CONTINUE
+      }
+      SysLib.rawwrite( indexBlockNumber , data );
+      
+      return true;
    }
   
-   short findTargetBlock( int offset ) {
+   public short findTargetBlock( int offset ) {
       
-    
+      target = offset / Disk.blockSize;
+      
+      if ( target < 11 ) {
+         return direct[target];
+      }
+      
+      if ( indirect < 0 ) {
+         return -1;
+      }
+   
+      // read the block pointed to by indirect to find the target block because the desired
+      // block is not pointed to by the direct pointers
+      byte[] data = new byte[Disk.blockSize];
+      SysLib.rawread( indirect , data );
+      
+      // calculate where the target block is within the index block
+      return SysLib.bytes2short( data , ( target - 11 ) * 2 );
       
    }
    
