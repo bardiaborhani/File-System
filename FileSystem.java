@@ -145,24 +145,97 @@ public class FileSystem {
   public synchronized boolean delete( String filename ){
  
     // grab the inode number to use to remove the file from the directory
-    short iNumber = dictionary.namei( filename );
+    short iNum = dictionary.namei( filename );
     
     // before deleting it needs to be checked to make sure that no threads are using the file
     // delete the fileEntryPoint if no other threads sharing it
     FileTableEntry ftEnt = open( filename, "r" );
-    return dictionary.ifree( iNumber );
+    return  ( close( ftEnt ) && dictionary.ifree( iNum ) );
     
     ..
     ..
     ..
   }
   
+  
+  
   private final int SEEK_SET = 0;
   private final int SEEK_CUR = 1;
   private final int SEEK_END = 2;
   
-  public int seek( FileTableEntry ftEnt , int offset , int whence ) {
   
+  public synchronized int seek( FileTableEntry ftEnt , int offset , int whence ) {
+  
+    
+    if ( whence == SEEK_SET ) {
+      
+      // If the user attempts to set the seek pointer to a negative number, the pointer must be set to zero.
+      if ( offset < 0 ) {
+        
+        ftEnt.seekPtr = 0;
+        
+      } else if ( offset >= fsize(ftEnt) ) {
+      
+        ftEnt.seekPtr = fsize(ftEnt);
+       
+      } else {
+        
+        ftEnt.seekPtr = offset;
+        
+      }
+                 
+      return ftEnt.seekPtr;          
+          
+    }
+    
+                 
+    
+    
+    if ( whence == SEEK_CUR ) {
+      
+      // If the user attempts to set the seek pointer to a negative number, the pointer must be set to zero.
+      if ( ftEnt.seekPtr + offset < 0 ) {
+        
+        ftEnt.seekPtr = 0;
+        
+      } else if ( ftEnt.seekPtr + offset >= fsize(ftEnt) ) {
+        
+        ftEnt.seekPtr = fsize(ftEnt);
+        
+      } else {
+        
+        ftEnt.seekPtr += offset;
+        
+      }
+                 
+      return ftEnt.seekPtr;     
+  
+    }
+    
+                 
+                 
+                 
+    if ( whence == SEEK_END ) {
+      
+      if ( fsize(ftEnt) + offset < 0 ) {
+        
+        ftEnt.seekPtr = 0;
+        
+      } else if ( fsize(ftEnt) + offset >= fsize(ftEnt) ) {
+       
+        ftEnt.seekPtr = fsize(ftEnt);
+          
+      } else {
+      
+        ftEnt.seekPtr = fsize(ftEnt) + offset;
+          
+      }
+                 
+      return ftEnt.seekPtr;
+                 
+    }
+    
+    
   }
  
   
