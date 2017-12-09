@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class FileTable {
 
    private Vector table;         // the actual entity of this file table
@@ -20,7 +22,7 @@ public class FileTable {
       
       while ( true ) {
        
-         iNumber = fnames.equals( "/" ) ? : 0 dir.namei( fname );   
+         iNumber = filename.equals( "/" ) ? 0: dir.namei( filename );   
          
          if ( iNumber >= 0 ){
           
@@ -30,7 +32,12 @@ public class FileTable {
             if ( mode.equals( "r" ) ) {
                
                // flag statuses unused (= 0), used(= 1), read(=2), write(=3), delete(=4)
-               
+               if (inode.flag == 0) {
+		  inode.flag = 1;
+		  break;
+	       }
+	       if (inode.flag == 1) 
+		  break;
                // inode.flag is "read"
                if ( inode.flag == 2 ){
                   // no need to wait
@@ -41,19 +48,44 @@ public class FileTable {
                   try{
                      wait();  
                   } catch( InterruptedException e ) { }
-               
+          
                // inode.flag is 'to be deleted'   
-               } else if ( inode.flag is == 4 ) {
+               } else if ( inode.flag == 4 ) {
                   iNumber = -1; // no more open
                   return null;
                }
                
             }
-            
+            else {
+               
+               // flag statuses unused (= 0), used(= 1), read(=2), write(=3), delete(=4)
+               if (inode.flag == 0) {
+		  inode.flag = 1;
+		  break;
+	       }
+	       if (inode.flag == 1) 
+		  break;
+               // inode.flag is "read"
+               if ( inode.flag == 2 ){
+                  // no need to wait
+                  break;  
+                  
+               // inode.flag is "write"  
+               } else if ( inode.flag == 3 ) {
+                  try{
+                     wait();  
+                  } catch( InterruptedException e ) { }
+          
+               // inode.flag is 'to be deleted'   
+               } else if ( inode.flag == 4 ) {
+                  iNumber = -1; // no more open
+                  return null;
+               }
+	    }
          }
-         
       }
-      
+      if (inode == null)
+      	inode = new Inode();
       inode.count++;
       inode.toDisk( iNumber );
       
@@ -71,8 +103,17 @@ public class FileTable {
    public synchronized boolean ffree( FileTableEntry e ) {
       // receive a file table entry reference
       // save the corresponding inode to the disk
+	e.inode.toDisk(e.iNumber);
       // free this file table entry.
-      // return true if this file table entry found in my table
+	for (int i = 0; i < table.size(); i++)
+	{
+	    // return true if this file table entry found in my table
+	    if (table.get(i) == e) {
+		table.remove(e);
+		return true;
+	    }		
+	}
+	return false;
    }
 
    public synchronized boolean fempty( ) {
