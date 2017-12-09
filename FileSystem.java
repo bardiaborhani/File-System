@@ -134,11 +134,22 @@ public class FileSystem {
   
   }
   
+  
   private boolean deallocAllBlocks( FileTableEntry ftEnt ){
   
+    short iNodeIndirect = ftEnt.inode.getIndexBlockNumber();
+    
+    for (int i = 0; i < 11; i++) {
+      if (inode.direct[i] != -1) {
+        superblock.returnBlock(inode.direct[i]);
+        inode.direct[i] = -1;
+      }
+    }
+    
+    return true;
+    
   }
   
-  // CONTINUE
   // delete the file from the filesystem
   // deletion is done by removing the filename from the directory and removing it from the
   // filesystem using close()
@@ -150,11 +161,8 @@ public class FileSystem {
     // before deleting it needs to be checked to make sure that no threads are using the file
     // delete the fileEntryPoint if no other threads sharing it
     FileTableEntry ftEnt = open( filename, "r" );
-    return  ( close( ftEnt ) && dictionary.ifree( iNum ) );
+    return  (  close( ftEnt )  &&  dictionary.ifree( iNum )  );
     
-    ..
-    ..
-    ..
   }
   
   
