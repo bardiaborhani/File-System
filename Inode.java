@@ -105,14 +105,17 @@ public class Inode {
       // fill the index block with block pointers
       // each block pointer is 2 bytes big
       // block size / block pointer size = # of block pointers 
-      for ( int i = 0; i < Disk.blockSize / 2; i++ ) { 
-         // CONTINUE
+      for ( int offset = 0; offset < Disk.blockSize / 2; offset++ ) { 
+         // each pointer is 2 bytes long so a offset of 2 needs happen
+         SysLib.short2bytes( (short) -1 , data , offset * 2);
       }
+      
       SysLib.rawwrite( indexBlockNumber , data );
       
       return true;
    }
   
+   
    public short findTargetBlock( int offset ) {
       
       target = offset / Disk.blockSize;
@@ -132,6 +135,14 @@ public class Inode {
       
       // calculate where the target block is within the index block
       return SysLib.bytes2short( data , ( target - 11 ) * 2 );
+      
+   }
+   
+   public int setTargetBlock( short block ) {
+      
+      // set to a direct pointer if one is free
+      
+      // if no direct pointers are free then set it to a pointer pointed to by indirect
       
    }
    
