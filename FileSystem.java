@@ -96,9 +96,7 @@ public class FileSystem {
   public boolean synchronized close( FileTableEntry ftEnt ){
   
     if ( ftEnt == null ) {
-      
       return false;
-      
     }
     
     ftEnt.count--;
@@ -135,17 +133,58 @@ public class FileSystem {
   }
   
   
-  private boolean deallocAllBlocks( FileTableEntry ftEnt ){
-  
-    short iNodeIndirect = ftEnt.inode.getIndexBlockNumber();
+  private boolean deallocAllBlocks( FileTableEntry ftEnt ) {
     
-    for (int i = 0; i < 11; i++) {
-      if (inode.direct[i] != -1) {
-        superblock.returnBlock(inode.direct[i]);
-        inode.direct[i] = -1;
-      }
+    // if the inode has file table entries pointing to it then the blocks cannot
+    // be deallocated since they are being used by the entries
+    if ( ftEnt.inode.count != 1 ) {
+      return false;
     }
     
+    // DEALLOCATE THE DIRECT BLOCKS
+    for ( int i = 0; i < 11; i++ ) {
+      
+      if ( ftEnt.inode.direct[i] != -1 ) {
+        
+        superblock.returnBlock(ftEnt.inode.direct[i]);
+        ftEnt.inode.direct[i] = -1;
+        
+      }
+      
+    }
+    
+    // DEALLOCATE THE INDIRECT BLOCKS
+    short iNodeIndirect = ftEnt.inode.getIndexBlockNumber();
+    
+    // if the indirect is pointing to a block of pointers then deallocate them
+    if ( indirect > -1 ) {
+      
+      // array that will contain the pointers in the block pointed to by indirect
+      byte[] indirectPointers = new byte[Disk.blockSize];
+      
+      // fill the array above by reading the pointers into the array
+      SysLib.rawread( indirect, indirectPointers );
+      
+      for (int i = 0; i < Disk.blockSize / 2; i += 2) {
+        
+        short block = SysLib.bytes2short( indirectPointers , i );
+        
+        if ( block != -1 ) {
+          superblock.returnBlock( block );
+        }
+        
+      }
+      
+      // set the indirect variable back to its initial value indicating it isn't pointing to anything
+      indirect = -1; 
+      
+    }
+    
+    
+    // read the contents of this file table entry's back to the disk
+    ftEnt.inode.toDisk( ftEnt.iNumber );
+    
+    // the blocks have successfully been deallocated
     return true;
     
   }
