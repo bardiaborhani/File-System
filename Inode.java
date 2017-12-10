@@ -157,7 +157,7 @@ public class Inode {
    // CONTINUE
    // Write after read and write are done in FileSystem.java
    // dont know if needs 1 or 2 parameters
-   public int setTargetBlock( int offset , short block ) {
+   public int setTargetBlock( int offset ) {
       
       // set where to place block, specified by the offset
       target = offset / Disk.blockSize;

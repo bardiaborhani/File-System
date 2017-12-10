@@ -146,7 +146,43 @@ public class FileSystem {
   }
   
   public int write( FileTableEntry ftEnt, byte[] buffer ){
-  
+  	int numBytesWritten = 0;
+	Inode inode = ftEnt.inode;
+	short targetBlock = inode.findTargetBlock(ftEnt.seek);
+	if (targetBlock == -1)
+		return 0;
+	int indexInTargetBlock = ftEnt.seek % Disk.blockSize;
+	byte[] data = new byte[Disk.blockSize];
+	SysLib.rawread(targetBlock, data);
+
+	int i = 0;
+	while (indexInTargetBlock < Disk.blockSize) {
+		data[indexInTargetBlock] = buffer[i];
+		ftEnt.seek++;
+		indexInTargetBlock++;
+		numBytesWritten++;
+		i++;
+	}
+	SysLib.rawwrite(targetBlock, data);
+	if (numBytesWritten == buffer.length() - 1)
+		return numBytesWritten;
+	
+	data = new byte[Disk.blockSize];
+	while (numBytesWritten < buffer.length()) {
+		int nextTargetBlock = ftEnt.inode.setTargetBlock(ftEnt.seek);
+		int numBytesToWrite;
+		numBytesToWrite = (buffer.length() - numBytesWritten <= Disk.blockSize) ? (buffer.length() - numBytesWritten) : Disk.blockSize;
+		for (int j = 0; j < numBytesToWrite; j++) {
+			data[j] = buffer[i];
+			ftEnt.seek++;
+			numBytesWritten++;
+			i++;
+		}
+		SysLib.rawwrite(nextTargetBlock, data);
+		if (numBytesWritten == buffer.length() - 1)
+			break;
+	}
+	return numBytesWritten;
   }
   
   
