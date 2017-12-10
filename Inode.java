@@ -138,9 +138,30 @@ public class Inode {
       
    }
    
-   public int setTargetBlock( short block ) {
+   // CONTINUE
+   // Write after read and write are done in FileSystem.java
+   // dont know if needs 1 or 2 parameters
+   public int setTargetBlock( int offset , short block ) {
       
-      // set to a direct pointer if one is free
+      // set where to place block, specified by the offset
+      target = offset / Disk.blockSize;
+      
+      // set to a direct pointer if one is free and if target specifies that it needs to be
+      // held by the direct data blocks
+      if ( target < 11 ) {
+         
+         // first check to make sure nothing is already at the place where the block is to be set
+         if (  ) {
+            
+         }
+      }
+      
+      if (indirect == -1) {
+         setIndexBlock(.....);
+      }
+      
+      // if block is not to be set in direct data blocks that means it is 
+      // desired to be set by a pointer pointed to by indirect
       
       // if no direct pointers are free then set it to a pointer pointed to by indirect
       

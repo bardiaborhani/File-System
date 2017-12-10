@@ -122,10 +122,23 @@ public class FileSystem {
     
   }
   
-  
-  
   public int read( FileTableEntry ftEnt, byte[] buffer ){
-  
+	int numBytesRead = 0;
+	int startPosition = ftEnt.seek;
+	int blockNumber = -1;
+	while (true) {
+		for (int i = 0; i < directSize; i++)
+			if (startPosition < 512) {
+				blockNumber = 1;
+				break;
+			}
+			startPosition-=512;
+		}
+		if (blockNumber == -1) {
+			
+		}
+	}
+  	return numBytesRead;
   }
   
   public int write( FileTableEntry ftEnt, byte[] buffer ){

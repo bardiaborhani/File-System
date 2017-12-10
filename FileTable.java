@@ -32,60 +32,53 @@ public class FileTable {
             if ( mode.equals( "r" ) ) {
                
                // flag statuses unused (= 0), used(= 1), read(=2), write(=3), delete(=4)
-               if (inode.flag == 0) {
-		  inode.flag = 1;
-		  break;
-	       }
-	       if (inode.flag == 1) 
-		  break;
-               // inode.flag is "read"
-               if ( inode.flag == 2 ){
-                  // no need to wait
-                  break;  
-                  
-               // inode.flag is "write"  
-               } else if ( inode.flag == 3 ) {
+	       if ( inode.flag == 3) {
                   try{
                      wait();  
-                  } catch( InterruptedException e ) { }
-          
-               // inode.flag is 'to be deleted'   
-               } else if ( inode.flag == 4 ) {
+                  } catch( InterruptedException e ) { }  
+               }
+                  
+               // inode.flag is 'to be deleted' 
+               else if ( inode.flag == 4 ) {
                   iNumber = -1; // no more open
                   return null;
                }
-               
+
+	       else {
+		  inode.flag = 2;
+		  break;
+	       }           
             }
             else {
                
                // flag statuses unused (= 0), used(= 1), read(=2), write(=3), delete(=4)
-               if (inode.flag == 0) {
-		  inode.flag = 1;
-		  break;
-	       }
-	       if (inode.flag == 1) 
-		  break;
-               // inode.flag is "read"
-               if ( inode.flag == 2 ){
-                  // no need to wait
-                  break;  
-                  
-               // inode.flag is "write"  
-               } else if ( inode.flag == 3 ) {
-                  try{
-                     wait();  
-                  } catch( InterruptedException e ) { }
-          
-               // inode.flag is 'to be deleted'   
-               } else if ( inode.flag == 4 ) {
+
+	       if ( inode.flag == 0 || inode.flag == 2) {
+                  inode.flag = 2;
+		  break; 
+               }
+	       // inode.flag is 'to be deleted' 
+               else if ( inode.flag == 4 ) {
                   iNumber = -1; // no more open
                   return null;
                }
+	       try{
+                   wait();  
+               } catch( InterruptedException e ) { } 
 	    }
          }
+	 else {
+	     if (mode != "r") {
+		iNumber = dir.ialloc(filename);
+		if (iNumber == -1)
+		    return null;
+	        inode = new Inode(iNumber);
+		break;
+	     }
+	     else
+	     	return null;
+	  }
       }
-      if (inode == null)
-      	inode = new Inode();
       inode.count++;
       inode.toDisk( iNumber );
       
@@ -97,7 +90,6 @@ public class FileTable {
       table.addElement( e );  
       
       return e;
-      
    }
 
    public synchronized boolean ffree( FileTableEntry e ) {
