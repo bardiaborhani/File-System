@@ -131,7 +131,7 @@ public class Inode {
    
    public short findTargetBlock( int offset ) {
       
-      // specify which data block is to retreived 
+      // specify which data block is to be retrieved 
       target = offset / Disk.blockSize;
       
       // the first 11 data blocks are pointed to directly - if the target is less than 11

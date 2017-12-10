@@ -124,18 +124,22 @@ public class FileSystem {
   
   public int read( FileTableEntry ftEnt, byte[] buffer ){
 	int numBytesRead = 0;
-	int startPosition = ftEnt.seek;
-	int blockNumber = -1;
-	while (true) {
-		for (int i = 0; i < directSize; i++)
-			if (startPosition < 512) {
-				blockNumber = 1;
-				break;
+	Inode inode = ftEnt.inode;
+	if (ftEnt.seek == inode.length)
+		return 0;
+	int i = 0;
+	while (ftEnt.seek <= inode.length && ftEnt.seek <= buffer.length()) {
+		short targetBlock = inode.findTargetBlock(ftEnt.seek);
+		if (targetBlock == -1)
+			return 0;
+		byte[] data = new byte[Disk.blockSize];
+		SysLib.rawread( indirect , data );
+		for (; i < ftEnt.seek <= inode.length && ftEnt.seek <= buffer.length(); i++) {
+			if (ftEnt.seek <= inode.length && ftEnt.seek <= buffer.length()){
+				buffer[i] = data[i];
+				ftEnt.seek+=1;
+				numBytesRead++;
 			}
-			startPosition-=512;
-		}
-		if (blockNumber == -1) {
-			
 		}
 	}
   	return numBytesRead;
