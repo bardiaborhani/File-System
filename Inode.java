@@ -74,8 +74,20 @@ public class Inode {
       // Finds the location within the block that the inode needs to be placed
       int diskOffset = ( iNumber % 16 ) * 32;
       
-      // ...CHECK...
-      SysLib.rawwrite( blockNumber +  diskOffset , iNodeInBytes );
+      // ...CHECK IF WORKS WITHOUT CODE BELOW...
+      //SysLib.rawwrite( blockNumber +  diskOffset , iNodeInBytes );
+      
+      byte[] wholeBlock = new byte[Disk.blockSize];
+      
+      SysLib.rawread( blockNumber , wholeBlock );
+      
+      // copy the iNode into the block
+      // by copying the iNodeInBytes (of size 32) into the wholeBlock representing the block
+      // the inode needs to be at a its specific offset in the block  - diskOffset states where the
+      // inode needs to sit in the block
+      System.arraycopy( iNodeInBytes , 0 , wholeBlock , diskOffset , 32 );
+      
+      SysLib.rawwrite( blockNumber , wholeBlock );
       
    }
    
@@ -85,17 +97,18 @@ public class Inode {
    
    public boolean setIndexBlock( short indexBlockNumber ) {
       
+       // if the index has already been set we cannot change its value
+      // the index cant be set if it's already set
+      if ( indirect == -1 ) {
+         return false;  
+      }
+     
       // no need to set indirect variable to a block if the 
       // if the file isn't big enough to filled the direct blocks
       for ( int i = 0; i < 11; i++ ) {
          if ( direct == -1 ) {
             return false;
          }
-      }
-      
-      // if the index has already been set we cannot change its value
-      if ( indirect == -1 ) {
-         return false;  
       }
       
       indirect = indexBlockNumber;
@@ -118,8 +131,11 @@ public class Inode {
    
    public short findTargetBlock( int offset ) {
       
+      // specify which data block is to retreived 
       target = offset / Disk.blockSize;
       
+      // the first 11 data blocks are pointed to directly - if the target is less than 11
+      // that means the target is held by one of these data blocks
       if ( target < 11 ) {
          return direct[target];
       }
@@ -138,9 +154,30 @@ public class Inode {
       
    }
    
-   public int setTargetBlock( short block ) {
+   // CONTINUE
+   // Write after read and write are done in FileSystem.java
+   // dont know if needs 1 or 2 parameters
+   public int setTargetBlock( int offset , short block ) {
       
-      // set to a direct pointer if one is free
+      // set where to place block, specified by the offset
+      target = offset / Disk.blockSize;
+      
+      // set to a direct pointer if one is free and if target specifies that it needs to be
+      // held by the direct data blocks
+      if ( target < 11 ) {
+         
+         // first check to make sure nothing is already at the place where the block is to be set
+         if (  ) {
+            
+         }
+      }
+      
+      if (indirect == -1) {
+         setIndexBlock(.....);
+      }
+      
+      // if block is not to be set in direct data blocks that means it is 
+      // desired to be set by a pointer pointed to by indirect
       
       // if no direct pointers are free then set it to a pointer pointed to by indirect
       
