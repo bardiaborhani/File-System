@@ -33,7 +33,7 @@ public class FileSystem {
 		close( dirEnt );
 	}
 
-	void sync() {
+	public void sync() {
 		FileTableEntry rootDir = this.open("/", "w");
 		byte[] directoryInBytes = this.directory.directory2bytes();
 		this.write(rootDir, directoryInBytes);
@@ -41,23 +41,25 @@ public class FileSystem {
 		this.superblock.sync();
 	}
 
-	boolean format(int files) {
-		while(!this.filetable.fempty()) {
-			;
+	public boolean format(int files) {
+		
+		// Cannot format no number of files
+		if ( files < 0 ) {
+		   return false;
 		}
-
+		   
 		this.superblock.format(files);
 		this.directory = new Directory(this.superblock.inodeBlocks);
 		this.filetable = new FileTable(this.directory);
 		return true;
 	}
 
-	FileTableEntry open(String fileName, String mode) {
+	public FileTableEntry open(String fileName, String mode) {
 		FileTableEntry fte = this.filetable.falloc(fileName, mode);
 		return mode == "w" && !this.deallocAllBlocks(fte) ? null : fte;
 	}
 
-	boolean close(FileTableEntry ftEnt) {
+	public boolean close(FileTableEntry ftEnt) {
 		synchronized(ftEnt) {
 			ftEnt.count--;
 			if (ftEnt.count > 0) {
@@ -68,13 +70,13 @@ public class FileSystem {
 		return this.filetable.ffree(ftEnt);
 	}
 
-	int fsize(FileTableEntry ftEnt) {
+	public int fsize(FileTableEntry ftEnt) {
 		synchronized(ftEnt) {
 			return ftEnt.inode.length;
 		}
 	}
 
-	int read(FileTableEntry ftEnt, byte[] buffer) {
+	public int read(FileTableEntry ftEnt, byte[] buffer) {
 		if (ftEnt.mode != "w" && ftEnt.mode != "a") {
 			int dataPointer = 0;
 			int dataSize = buffer.length;
@@ -104,7 +106,7 @@ public class FileSystem {
 		}
 	}
 
-	int write(FileTableEntry ftEnt, byte[] buffer) {
+	public int write(FileTableEntry ftEnt, byte[] buffer) {
 		if (ftEnt.mode == "r") {
 			return -1;
 		} else {
