@@ -248,12 +248,12 @@ public class FileSystem {
   public synchronized boolean delete( String filename ){
  
     // grab the inode number to use to remove the file from the directory
-    short iNum = dictionary.namei( filename );
+    short iNum = directory.namei( filename );
     
     // before deleting it needs to be checked to make sure that no threads are using the file
     // delete the fileEntryPoint if no other threads sharing it
     FileTableEntry ftEnt = open( filename, "r" );
-    return  (  close( ftEnt )  &&  dictionary.ifree( iNum )  );
+    return  (  close( ftEnt )  &&  directory.ifree( iNum )  );
     
   }
   

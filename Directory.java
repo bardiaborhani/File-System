@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Directory {
    
    private static int maxChars = 30; // max characters of each file name
@@ -55,14 +57,15 @@ public class Directory {
       }
 
       // CHECK
-      for ( int i = 0; i < fnames.length; i++, offset += maxChars * 2 ) { 
+      for ( int i = 0; i < fnames.length; i++ ) { 
          
          char[] tempName = fnames[i];
          byte[] nameInBytes = new byte[tempName.length];
          for ( int j = 0; j < tempName.length; j++ ) {
-            nameInBytes[j] = (byte) tempName[j];   
+            nameInBytes[j] = (byte) tempName[j];  
+	    dictionaryInBytes[offset] = nameInBytes[j]; 
+	    offset++;
          }
-         dictionaryInBytes[offset] = temp;      
       }
       
       return dictionaryInBytes;
