@@ -165,9 +165,11 @@ public class FileSystem {
 			}
 		}
 	}
+	
+	
 	private boolean deallocAllBlocks( FileTableEntry ftEnt ) {
 
-		// if the inode has file table entries pointing to it then the blocks cannot
+		 // if the inode has file table entries pointing to it then the blocks cannot
 		// be deallocated since they are being used by the entries
 		if ( ftEnt.inode.count != 1 ) {
 			return false;
@@ -175,31 +177,35 @@ public class FileSystem {
 
 		// DEALLOCATE THE DIRECT BLOCKS
 		for ( int i = 0; i < 11; i++ ) {
-
 			if ( ftEnt.inode.direct[i] != -1 ) {
-
 				superblock.returnBlock(ftEnt.inode.direct[i]);
 				ftEnt.inode.direct[i] = -1;
-
 			}
-
 		}
 
 		// DEALLOCATE THE INDIRECT BLOCKS
 		short iNodeIndirect = ftEnt.inode.getIndexBlockNumber();
 
-		// if the indirect is pointing to a block of pointers then deallocate them
-		if ( indirect > -1 ) {
+		// if indirect has an index block then deallocate it
+		if (iNodeIndirect >= 0) {
 
 			// array that will contain the pointers in the block pointed to by indirect
-			byte[] indirectPointers = new byte[Disk.blockSize];
+               		byte[] indirectPointers = new byte[Disk.blockSize];
 
 			// fill the array above by reading the pointers into the array
-			SysLib.rawread( indirect, indirectPointers );
+                	SysLib.rawread( iNodeIndirect , indirectPointers );
 
-			for (int i = 0; i < Disk.blockSize / 2; i += 2) {
+			// set the indirect variable back to its initial value indicating it isn't pointing to anything
+            		indirect = -1;
+        	}
+	
+		if ( indirectPointers != null ) {
 
-				short block = SysLib.bytes2short( indirectPointers , i );
+			for (int offset = 0; offset < Disk.blockSize; offset += 2) {
+
+				// each pointer to a data block is 2 bytes big - so offset goes up by 2 on every loop to cycle
+				// through all the pointers in the index block
+				short block = SysLib.bytes2short( indirectPointers , offset );
 
 				if ( block != -1 ) {
 					superblock.returnBlock( block );
@@ -207,11 +213,8 @@ public class FileSystem {
 
 			}
 
-			// set the indirect variable back to its initial value indicating it isn't pointing to anything
-			indirect = -1;
-
 		}
-
+	
 
 		// read the contents of this file table entry's back to the disk
 		ftEnt.inode.toDisk( ftEnt.iNumber );
