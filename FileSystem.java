@@ -32,7 +32,7 @@ public class FileSystem {
 		close( dirEnt );
 	}
 
-	void sync() {
+	public void sync() {
 		FileTableEntry rootDir = this.open("/", "w");
 		byte[] directoryInBytes = this.directory.directory2bytes();
 		this.write(rootDir, directoryInBytes);
@@ -47,14 +47,10 @@ public class FileSystem {
 		if ( files < 0 ) {
 		   return false;
 		}
-		    
-		superblock.format( files );
-		    
-		directory = new Directory( superblock.inodeBlocks );
-
-		// put the directory in the FileTable
-		filetable = new FileTable( directory );
 		   
+		this.superblock.format(files);
+		this.directory = new Directory(this.superblock.inodeBlocks);
+		this.filetable = new FileTable(this.directory);
 		return true;
 	    
 	}
@@ -79,7 +75,7 @@ public class FileSystem {
 		
     	}
 
-	boolean close(FileTableEntry ftEnt) {
+	public boolean close(FileTableEntry ftEnt) {
 		synchronized(ftEnt) {
 			if ( ftEnt == null )
 			      return false;
@@ -94,13 +90,13 @@ public class FileSystem {
 		return true;
 	}
 
-	int fsize(FileTableEntry ftEnt) {
+	public int fsize(FileTableEntry ftEnt) {
 		synchronized(ftEnt) {
 			return ftEnt.inode.length;
 		}
 	}
 
-	int read(FileTableEntry ftEnt, byte[] buffer) {
+	public int read(FileTableEntry ftEnt, byte[] buffer) {
 		if (ftEnt.mode != "w" && ftEnt.mode != "a") {
 			int dataPointer = 0;
 			int dataSize = buffer.length;
@@ -130,7 +126,7 @@ public class FileSystem {
 		}
 	}
 
-	int write(FileTableEntry ftEnt, byte[] buffer) {
+	public int write(FileTableEntry ftEnt, byte[] buffer) {
 		if (ftEnt.mode == "r") {
 			return -1;
 		} else {
