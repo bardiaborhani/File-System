@@ -5,11 +5,11 @@ public class SuperBlock {
 	public int freeList;
 
 	public SuperBlock(int numBlocks) {
-		byte[] var2 = new byte[Disk.blockSize];
-		SysLib.rawread(0, var2);
-		this.totalBlocks = SysLib.bytes2int(var2, 0);
-		this.inodeBlocks = SysLib.bytes2int(var2, 4);
-		this.freeList = SysLib.bytes2int(var2, 8);
+		byte[] superBlock = new byte[Disk.blockSize];
+		SysLib.rawread(0, superBlock);
+		this.totalBlocks = SysLib.bytes2int(superBlock, 0);
+		this.inodeBlocks = SysLib.bytes2int(superBlock, 4);
+		this.freeList = SysLib.bytes2int(superBlock, 8);
 		if (this.totalBlocks != numBlocks || this.inodeBlocks <= 0 || this.freeList < 2) {
 			this.totalBlocks = numBlocks;
 			SysLib.cerr("default format( 64 )\n");
@@ -63,10 +63,10 @@ public class SuperBlock {
 			SysLib.rawread(currentFree, newFree);
 			this.freeList = SysLib.bytes2int(newFree, 0);
 			SysLib.int2bytes(0, newFree, 0);
-			SysLib.rawwrite(currentFree, var2);
+			SysLib.rawwrite(currentFree, newFree);
 		}
 
-		return numBlocks;
+		return currentFree;
 	}
 
 	public boolean returnBlock(int blockNumber) {
