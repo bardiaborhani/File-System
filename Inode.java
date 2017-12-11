@@ -154,7 +154,9 @@ public class Inode {
       
    }
    
-   // CONTINUE
+   
+   /*
+   // For 1st version of write method in FileSystem.java
    // Write after read and write are done in FileSystem.java
    // dont know if needs 1 or 2 parameters
    public int setTargetBlock( int offset ) {
@@ -162,24 +164,104 @@ public class Inode {
       // set where to place block, specified by the offset
       target = offset / Disk.blockSize;
       
+      if ( target < 0 ) {
+         return -1;
+      }
+      
       // set to a direct pointer if one is free and if target specifies that it needs to be
       // held by the direct data blocks
       if ( target < 11 ) {
          
          // first check to make sure nothing is already at the place where the block is to be set
-         if (  ) {
-            
+         if ( direct[target] > -1 ) {
+            return -1;
          }
+         
+         // set the new block into the specified direct data block
+         direct[target] = newLocation;
+         
+         // successfully set
+         return target;
       }
       
       if (indirect == -1) {
-         setIndexBlock(.....);
+         
+         // need to call "short freeBlock = (short)this.superblock.getFreeBlock();" , register the freeBlock,
+         // then call this method again with the same parameter as before
+		   return -2;
+      
       }
+      
+      byte[] data = new byte[Disk.blockSize];
+
+      SysLib.rawread( indirect, data );
+
+      if ( SysLib.bytes2short( data , ((target - 11) * 2) )  > 0 ) {
+         return -1;
+      }
+      
+      SysLib.short2bytes( newLocation , data , ((target - 11) * 2) );
+
+      SysLib.rawwrite( indirect , data );
+
+      // successfully set
+      return 0;
       
       // if block is not to be set in direct data blocks that means it is 
       // desired to be set by a pointer pointed to by indirect
       
       // if no direct pointers are free then set it to a pointer pointed to by indirect
+      
+   }
+   */
+   
+   
+   
+   // For 2nd version of write method in FileSystem.java
+   public int registerTargetBlock( int offset , short newLocation ) {
+   
+      // set where to place block, specified by the offset
+      target = offset / Disk.blockSize;
+      
+      if ( target < 0 ) {
+         return -1;
+      }
+      
+      // set to a direct pointer if one is free and if target specifies that it needs to be
+      // held by the direct data blocks
+      if ( target < 11 ) {
+         
+         // first check to make sure nothing is already at the place where the block is to be set
+         if ( direct[target] > -1 ) {
+            return -1;
+         }
+         
+         // set the new block into the specified direct data block
+         direct[target] = newLocation;
+         
+         // successfully set
+         return 0;
+      }
+      
+      if (indirect == -1) {
+         return -3;
+      }
+      
+      byte[] data = new byte[Disk.blockSize];
+
+      SysLib.rawread( indirect, data );
+
+      if ( SysLib.bytes2short( data , ((target - 11) * 2) )  > 0 ) {
+         return -1;
+      }
+      
+      SysLib.short2bytes( newLocation , data , ((target - 11) * 2) );
+
+      SysLib.rawwrite( indirect , data );
+
+      // successfully set
+      return 0;
+
       
    }
    
