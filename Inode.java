@@ -166,26 +166,9 @@ public class Inode {
       return SysLib.bytes2short( data , ( target - 11 ) * 2 );
       
    }
-   
-   
 
 
-// .......DELETE......
-   byte[] unregisterIndexBlock()
-  {
-    if (indirect >= 0) {
-      byte[] arrayOfByte = new byte['Ȁ'];
-      SysLib.rawread(indirect, arrayOfByte);
-      indirect = -1;
-      return arrayOfByte;
-    }
-    
-    return null;
-  }
-
-
-   
-   // For 2nd version of write method in FileSystem.java
+	
    public int setTargetBlock( int offset , short newLocation ) {
    
       // set where to place block, specified by the offset
