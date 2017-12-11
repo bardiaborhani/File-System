@@ -43,9 +43,11 @@ public class Inode {
       
    }
 
+
    // put the contents of this Inode object (the field variable values) into disk
    public void toDisk( short iNumber ) {                  // save to disk as the i-th inode
            
+
       // This byte array will contain all the values of this object (the field variable values)
       // will be used later as a parameter in SysLib.rawwrite() to insert the data into disk
       byte[] iNodeInBytes = new byte[iNodeSize];
@@ -88,28 +90,37 @@ public class Inode {
       System.arraycopy( iNodeInBytes , 0 , wholeBlock , diskOffset , 32 );
       
       SysLib.rawwrite( blockNumber , wholeBlock );
-      
+
    }
    
+
+
+   // returns the index of the index block in which the indirect points to 
    public short getIndexBlockNumber() {
       return indirect;
    }
-   
+
+
+
+
    public boolean setIndexBlock( short indexBlockNumber ) {
       
+
        // if the index has already been set we cannot change its value
       // the index cant be set if it's already set
-      if ( indirect == -1 ) {
+      // if it is not set - it should have a value of -1
+      // also the index block must be a valid block number so it cannot be below 0 since it will be ued to index when rawwrite is used
+      if ( indirect != -1 || indexBlockNumber < 0  ) {
          return false;  
       }
      
       // no need to set indirect variable to a block if the 
       // if the file isn't big enough to filled the direct blocks
       for ( int i = 0; i < 11; i++ ) {
-         if ( direct == -1 ) {
+         if ( direct[i] == (short) -1 ) {	
             return false;
          }
-      }
+      } 
       
       indirect = indexBlockNumber;
       
@@ -128,11 +139,13 @@ public class Inode {
       return true;
    }
   
+
+
    
-   public short findTargetBlock( int offset ) {
+   public int findTargetBlock( int offset ) {
       
       // specify which data block is to be retrieved 
-      target = offset / Disk.blockSize;
+      int target = offset / Disk.blockSize;
       
       // the first 11 data blocks are pointed to directly - if the target is less than 11
       // that means the target is held by one of these data blocks
@@ -155,73 +168,28 @@ public class Inode {
    }
    
    
-   /*
-   // For 1st version of write method in FileSystem.java
-   // Write after read and write are done in FileSystem.java
-   // dont know if needs 1 or 2 parameters
-   public int setTargetBlock( int offset ) {
-      
-      // set where to place block, specified by the offset
-      target = offset / Disk.blockSize;
-      
-      if ( target < 0 ) {
-         return -1;
-      }
-      
-      // set to a direct pointer if one is free and if target specifies that it needs to be
-      // held by the direct data blocks
-      if ( target < 11 ) {
-         
-         // first check to make sure nothing is already at the place where the block is to be set
-         if ( direct[target] > -1 ) {
-            return -1;
-         }
-         
-         // set the new block into the specified direct data block
-         direct[target] = newLocation;
-         
-         // successfully set
-         return target;
-      }
-      
-      if (indirect == -1) {
-         
-         // need to call "short freeBlock = (short)this.superblock.getFreeBlock();" , register the freeBlock,
-         // then call this method again with the same parameter as before
-		   return -2;
-      
-      }
-      
-      byte[] data = new byte[Disk.blockSize];
 
-      SysLib.rawread( indirect, data );
 
-      if ( SysLib.bytes2short( data , ((target - 11) * 2) )  > 0 ) {
-         return -1;
-      }
-      
-      SysLib.short2bytes( newLocation , data , ((target - 11) * 2) );
+// .......DELETE......
+   byte[] unregisterIndexBlock()
+  {
+    if (indirect >= 0) {
+      byte[] arrayOfByte = new byte['Ȁ'];
+      SysLib.rawread(indirect, arrayOfByte);
+      indirect = -1;
+      return arrayOfByte;
+    }
+    
+    return null;
+  }
 
-      SysLib.rawwrite( indirect , data );
 
-      // successfully set
-      return 0;
-      
-      // if block is not to be set in direct data blocks that means it is 
-      // desired to be set by a pointer pointed to by indirect
-      
-      // if no direct pointers are free then set it to a pointer pointed to by indirect
-      
-   }
-   */
-   
-   
    
    // For 2nd version of write method in FileSystem.java
    public int setTargetBlock( int offset , short newLocation ) {
    
       // set where to place block, specified by the offset
-      target = offset / Disk.blockSize;
+      int target = offset / Disk.blockSize;
       
       if ( target < 0 ) {
          return -1;
@@ -232,17 +200,18 @@ public class Inode {
       if ( target < 11 ) {
          
          // first check to make sure nothing is already at the place where the block is to be set
-         if ( direct[target] > -1 ) {
+         if ( (direct[target] > -1)  ||  ((target > 0) && (direct[target-1] == -1)) ) {
             return -1;
          }
          
          // set the new block into the specified direct data block
-         direct[target] = newLocation;
+	 direct[target] = newLocation;
          
-         // successfully set
+	 // successfully set
          return 0;
       }
       
+      // if the indirect variable has not been set up to point to a index block then it must be done - once -3 is returned, FileSystem will know to get a free block using getFreeBlock() method from the SuperBloc class , set it up using setIndexBlock method with the passed in new block and this method will be called agains
       if (indirect == -1) {
          return -3;
       }
