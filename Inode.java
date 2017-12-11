@@ -218,7 +218,7 @@ public class Inode {
    
    
    // For 2nd version of write method in FileSystem.java
-   public int registerTargetBlock( int offset , short newLocation ) {
+   public int setTargetBlock( int offset , short newLocation ) {
    
       // set where to place block, specified by the offset
       target = offset / Disk.blockSize;
