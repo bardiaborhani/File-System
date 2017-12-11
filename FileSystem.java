@@ -14,7 +14,7 @@ public class FileSystem {
 		directory = new Directory( superblock.inodeBlocks );
 
 		// file table is created, and store directory in the file table
-		filetable = FileTable( directory );
+		filetable = new FileTable( directory );
 
 		// directory reconstruction
 		FileTableEntry dirEnt = open( "/" , "r" );
@@ -61,7 +61,7 @@ public class FileSystem {
 
 	// Opens the file specified by the fileName string in 
   	// the given mode (where "r" = ready only, "w" = write only, "w+" = read/write, "a" = append).
-  	public FileTabeEntry open( String filename , String mode ){
+  	public FileTableEntry open( String filename , String mode ){
 	    	//The file is created if it does not exist in the mode "w", "w+" or "a".ab
 	    	// if the file is not in the directory it means it has not been created
 		if( directory.namei( filename ) == -1 ) {
@@ -210,16 +210,16 @@ public class FileSystem {
 		}
 
 		// DEALLOCATE THE INDIRECT BLOCKS
-		short iNodeIndirect = ftEnt.inode.getIndexBlockNumber();
+		int iNodeIndirect = ftEnt.inode.findIndexBlock();
 
 		// if the indirect is pointing to a block of pointers then deallocate them
-		if ( indirect > -1 ) {
+		if ( iNodeIndirect > -1 ) {
 
 			// array that will contain the pointers in the block pointed to by indirect
 			byte[] indirectPointers = new byte[Disk.blockSize];
 
 			// fill the array above by reading the pointers into the array
-			SysLib.rawread( indirect, indirectPointers );
+			SysLib.rawread( iNodeIndirect, indirectPointers );
 
 			for (int i = 0; i < Disk.blockSize / 2; i += 2) {
 
@@ -232,7 +232,7 @@ public class FileSystem {
 			}
 
 			// set the indirect variable back to its initial value indicating it isn't pointing to anything
-			indirect = -1;
+			ftEnt.inode.indirect = -1;
 
 		}
 
@@ -251,12 +251,12 @@ public class FileSystem {
 	public synchronized boolean delete( String filename ){
 
 		// grab the inode number to use to remove the file from the directory
-		short iNum = dictionary.namei( filename );
+		short iNum = directory.namei( filename );
 
 		// before deleting it needs to be checked to make sure that no threads are using the file
 		// delete the fileEntryPoint if no other threads sharing it
 		FileTableEntry ftEnt = open( filename, "r" );
-		return  (  close( ftEnt )  &&  dictionary.ifree( iNum )  );
+		return  (  close( ftEnt )  &&  directory.ifree( iNum )  );
 
 	}
 	public synchronized int seek( FileTableEntry ftEnt , int offset , int whence ) {
@@ -329,9 +329,7 @@ public class FileSystem {
 			return ftEnt.seekPtr;
 
 		}
-
-
+		return -1;
 	}
-
 
 }
