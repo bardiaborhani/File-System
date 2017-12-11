@@ -37,7 +37,7 @@ public class SuperBlock {
 		for(int i = 0; i < this.inodeBlocks; i++) {
 			Inode temp = new Inode();
 			temp.flag = 0;
-			temp.toDisk(i);
+			temp.toDisk( (short) i );
 		}
 
 		this.freeList = 2 + this.inodeBlocks * 32 / 512;
