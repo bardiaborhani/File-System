@@ -9,7 +9,7 @@ public class Inode {
    public short direct[] = new short[directSize]; // direct pointers
    public short indirect;                         // a indirect pointer
 
-   Inode( ) {                                     // a default constructor
+   Inode( ) {                                     // a default constructorr
       length = 0;
       count = 0;
       flag = 1;
